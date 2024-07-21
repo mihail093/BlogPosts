@@ -29,24 +29,36 @@ export default function Home() {
 
   // Rendering del componente
   return (
-    <div className="container mx-auto p-5">
-      <h1>Lista dei Post</h1>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5 py-5">
-        {/* Mappa attraverso l'array dei post e crea un elemento per ciascuno */}
-        {posts.map((post) => (
-          // Link wrappa ogni post, permettendo la navigazione alla pagina di dettaglio
-          <Link to={`/post/${post._id}`} key={post._id} className="border border-gray-300 rounded-lg overflow-hidden no-underline text-inherit transition-transform duration-300 ease-in-out hover:-translate-y-1">
-            {/* Immagine di copertina del post */}
-            <img src={post.cover} alt={post.title} className="w-full h-[200px] object-cover" />
-            <div className="p-4">
-              {/* Titolo del post */}
-              <h2 className="mb-2.5 text-xl">{post.title}</h2>
-              {/* Autore del post */}
-              <p className="m-0 text-gray-600">Autore: {post.author}</p>
+    <div className="container mx-auto px-4 py-8">
+    <h1 className="text-3xl font-bold text-red-800 mb-8">Lista dei Post</h1>
+    
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {posts.map((post) => (
+        <Link 
+          to={`/post/${post._id}`} 
+          key={post._id} 
+          className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 flex flex-col"
+        >
+          <img 
+            src={post.cover} 
+            alt={post.title} 
+            className="w-full h-48 object-cover"
+          />
+          <div className="p-4 flex flex-col flex-grow">
+            <h2 className="text-xl font-semibold text-red-800 mb-2 line-clamp-2">{post.title}</h2>
+            <p className="text-sm text-gray-600 mb-2">Autore: {post.author}</p>
+            <div className="mt-auto flex justify-between items-center">
+              <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                {post.category}
+              </span>
+              <span className="text-xs text-gray-500">
+                {post.readTime.value} {post.readTime.unit} lettura
+              </span>
             </div>
-          </Link>
-        ))}
-      </div>
+          </div>
+        </Link>
+      ))}
     </div>
+  </div>
   );
 }

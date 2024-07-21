@@ -3,6 +3,7 @@ import BlogPost from "../models/BlogPost.js";
 // import upload from "../middlewares/upload.js";
 // import controlloMail from "../middlewares/controlloMail.js"; // NON USARE - SOLO PER DIDATTICA - MIDDLEWARE (commentato)
 import cloudinaryUploader from "../config/cloudinaryConfig.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { sendEmail } from "../services/emailServices.js"; // Import del codice per l'invio delle mail (INVIO MAIL)
 
 
@@ -47,6 +48,8 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+router.use(authMiddleware);
 
 // POST /blogPosts: crea un nuovo blog post
 /* router.post("/", async (req, res) => {

@@ -6,6 +6,8 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import CreatePost from "./pages/CreatePost";
 import PostDetail from "./pages/PostDetail";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
 
 // Definisce il componente principale App
 function App() {
@@ -20,6 +22,12 @@ function App() {
         <main className="flex-1 py-5">
           {/* Routes definisce le diverse rotte dell'applicazione */}
           <Routes>
+            {/* Route per la pagina di registrazione*/}
+            <Route path="/register" element={<Register />} />
+
+            {/* Route per la pagina di login*/}
+            <Route path="/login" element={<Login />} />
+            
             {/* Route per la home page */}
             <Route path="/" element={<Home />} />
 

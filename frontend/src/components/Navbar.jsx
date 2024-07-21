@@ -1,31 +1,76 @@
 // Importa il componente Link da react-router-dom per la navigazione
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
-  return (
-    <nav className="bg-gray-100 py-2.5">
-      {/* Container per centrare e limitare la larghezza del contenuto */}
-      <div className="container mx-auto p-5">
-        {/* Link al brand/logo dell'app, che porta alla home page */}
-        <Link to="/" className="text-2xl font-bold text-gray-800 no-underline">
-          Blog App
-        </Link>
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
-        {/* Menu */}
-        <ul className="list-none p-0 mt-5 flex">
-          {/* Link alla home page */}
-          <li className="mr-4">
-            <Link to="/" className="text-gray-800 no-underline hover:underline">
+  useEffect(() => {
+    // Controlla se esiste un token nel localStorage
+    const checkLoginStatus = () => {
+      const token = localStorage.getItem("token");
+      console.log("Token:", token);
+      setIsLoggedIn(!!token);
+    };
+
+    // Controlla lo stato di login all'avvio
+    checkLoginStatus();
+
+    // Aggiungi un event listener per controllare lo stato di login
+    window.addEventListener("storage", checkLoginStatus);
+
+    // Rimuovi l'event listener quando il componente viene smontato
+    return () => {
+      window.removeEventListener("storage", checkLoginStatus);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    navigate("/");
+  };
+
+  return (
+    <nav className="bg-red-800 py-4 shadow-md">
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        <Link to="/" className="text-2xl font-bold text-white no-underline hover:text-yellow-300 transition duration-300">
+          Strive Blog
+        </Link>
+        <ul className="flex space-x-6">
+          <li>
+            <Link to="/" className="text-white no-underline hover:text-yellow-300 transition duration-300">
               Home
             </Link>
           </li>
-
-          {/* Link alla pagina di creazione del post */}
-          <li className="mr-4">
-            <Link to="/create" className="text-gray-800 no-underline hover:underline">
-              Nuovo Post
-            </Link>
-          </li>
+          {isLoggedIn ? (
+            <>
+              <li>
+                <Link to="/create" className="text-white no-underline hover:text-yellow-300 transition duration-300">
+                  Nuovo Post
+                </Link>
+              </li>
+              <li>
+                <button onClick={handleLogout} className="text-white no-underline hover:text-yellow-300 transition duration-300">
+                  Logout
+                </button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <Link to="/login" className="text-white no-underline hover:text-yellow-300 transition duration-300">
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/register" className="text-white no-underline hover:text-yellow-300 transition duration-300">
+                  Registrati
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
       </div>
     </nav>

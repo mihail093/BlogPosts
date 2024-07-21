@@ -1,13 +1,23 @@
-// Importa useState hook da React
-import { useState } from "react";
+// Importa useState e useEffect da React
+import { useState, useEffect } from "react";
 // Importa useNavigate da react-router-dom per la navigazione programmatica
 import { useNavigate } from "react-router-dom";
-// Importo la funzione createPost dal mio file services/api
-import { createPost } from "../services/api";
+// Importo le funzioni createPost e getMe dal mio file services/api
+import { createPost, getMe } from "../services/api";
 
 export default function CreatePost() {
 
   const [coverFile, setCoverFile] = useState(null);
+
+  // Creo una funzione che calcola il tempo di lettura
+  const calculateReadTime = (content) => {
+    const words = content.trim().split(/\s+/).length;
+    const readingTime = Math.ceil(words / 200); // Assumiamo 200 parole al minuto
+    return {
+      value: readingTime,
+      unit: readingTime === 1 ? "minuto" : "minuti"
+    };
+  };
 
   // Stato per memorizzare i dati del nuovo post
   const [post, setPost] = useState({
@@ -15,25 +25,40 @@ export default function CreatePost() {
     category: "",
     content: "",
     cover: "",
-    readTime: { value: 0, unit: "minutes" },
+    readTime: { value: 0, unit: "minuti" },
     author: "",
   });
 
   // Hook per la navigazione
   const navigate = useNavigate();
 
+  // useEffect per l'autenticazione
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      try {
+        const userData = await getMe();
+        setPost((prevPost) => ({ ...prevPost, author: userData.email }));
+      } catch (error) {
+        console.error("Errore nel recupero dei dati utente:", error);
+        navigate("/login");
+      }
+    };
+    fetchUserEmail();
+  }, [navigate]);
+
   // Gestore per i cambiamenti nei campi del form
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "readTimeValue") {
-      // Gestiamo il "readTime" del post
-      setPost({
-        ...post,
-        readTime: { ...post.readTime, value: parseInt(value) },
-      });
+    
+    if (name === "content") {
+      const readTime = calculateReadTime(value);
+      setPost(prevPost => ({
+        ...prevPost,
+        [name]: value,
+        readTime: readTime
+      }));
     } else {
-      // Aggiornamento generale per gli altri campi
-      setPost({ ...post, [name]: value });
+      setPost(prevPost => ({ ...prevPost, [name]: value }));
     }
   };
 
@@ -74,90 +99,76 @@ export default function CreatePost() {
 
   // Template del componente
   return (
-    <div>
-      <h1 className="text-center">Crea un nuovo post</h1>
-      <form onSubmit={handleSubmit} className="max-w-[600px] mx-auto">
-        {/* Campo per il titolo */}
-        <div className="mb-5">
-          <label className="block mb-1">Titolo</label>
-          <input 
-            className="w-full p-2 border border-gray-300 rounded"
-            type="text"
-            id="title"
-            name="title"
-            value={post.title}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {/* Campo per la categoria */}
-        <div className="mb-5">
-          <label className="block mb-1">Categoria</label>
-          <input
-            className="w-full p-2 border border-gray-300 rounded"
-            type="text"
-            id="category"
-            name="category"
-            value={post.category}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {/* Campo per il contenuto HTML */}
-        <div className="mb-5">
-          <label className="block mb-1">Contenuto</label>
-          <textarea
-            className="w-full p-2 border border-gray-300 rounded h-[150px]"
-            id="content"
-            name="content"
-            value={post.content}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {/* Campo per l'URL dell'immagine di copertina del post */}
-        <div className="mb-5">
-          <label className="block mb-1">URL Immagine</label>
-          <input
-            className="w-full p-2 border border-gray-300 rounded"
-            type="file"
-            id="cover"
-            name="cover"
-            onChange={handleFileChange}
-            required
-          />
-        </div>
-        {/* Campo per il tempo di lettura */}
-        <div className="mb-5">
-          <label className="block mb-1">Tempo di lettura (minuti)</label>
-          <input
-            className="w-full p-2 border border-gray-300 rounded"
-            type="number"
-            id="readTimeValue"
-            name="readTimeValue"
-            value={post.readTime.value}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {/* Campo per l'email dell'autore */}
-        <div className="mb-5">
-          <label className="block mb-1">Email autore</label>
-          <input
-            className="w-full p-2 border border-gray-300 rounded"
-            type="email"
-            id="author"
-            name="author"
-            value={post.author}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {/* Pulsante di invio */}
-        <button type="submit" className="bg-blue-500 text-white border-none py-2 px-5 rounded cursor-pointer hover:bg-blue-700">
-          Crea il post
-        </button>
-      </form>
+    <div className="container mx-auto px-4 py-8">
+    <h1 className="text-3xl font-bold text-red-800 text-center mb-8">
+      Benvenuto/a {post.author}, crea un nuovo post
+    </h1>
+    
+    <form onSubmit={handleSubmit} className="max-w-[600px] mx-auto bg-white p-8 rounded-lg shadow-md">
+      <div className="mb-6">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">Titolo</label>
+        <input
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-800"
+          type="text"
+          id="title"
+          name="title"
+          value={post.title}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+        <input
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-800"
+          type="text"
+          id="category"
+          name="category"
+          value={post.category}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">Contenuto</label>
+        <textarea
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-800 h-[200px]"
+          id="content"
+          name="content"
+          value={post.content}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="cover" className="block text-sm font-medium text-gray-700 mb-2">Immagine di copertina</label>
+        <input
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-800 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-800 hover:file:bg-yellow-300"
+          type="file"
+          id="cover"
+          name="cover"
+          onChange={handleFileChange}
+          required
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="readTimeValue" className="block text-sm font-medium text-gray-700 mb-2">Tempo di lettura stimato</label>
+        <p className="p-3 bg-gray-100 rounded-md">
+          {post.readTime.value} {post.readTime.unit}
+        </p>
+      </div>
+
+      <button 
+        type="submit" 
+        className="w-full bg-red-800 text-white py-3 px-6 rounded-md hover:bg-yellow-300 hover:text-red-800 transition duration-300 ease-in-out"
+      >
+        Crea il post
+      </button>
+    </form>
     </div>
   );
 }
