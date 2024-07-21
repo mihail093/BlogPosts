@@ -4,6 +4,8 @@ import { generateJWT } from "../utils/jwt.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import passport from "../config/passportConfig.js";
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
+
 const router = express.Router();
 
 // POST /login: restituirà un token di accesso
@@ -54,28 +56,24 @@ router.get(
 router.get(
 "/google/callback",
 // Passport tenta di autenticare l'utente con le credenziali Google
-passport.authenticate("google", { failureRedirect: "/login" }),
-// Se l'autenticazione fallisce, l'utente viene reindirizzato alla pagina di login
+passport.authenticate("google", { failureRedirect: `${FRONTEND_URL}/login` }), // Se l'autenticazione fallisce, l'utente viene reindirizzato alla pagina di login
+)
 
-async (req, res) => {
+// Funzione helper per gestire il callback di autenticazione
+async function handleAuthCallback(req, res) {
     try {
-    // A questo punto, l'utente è autenticato con successo
-    // req.user contiene i dati dell'utente forniti da Passport
-
-    // Genera un JWT (JSON Web Token) per l'utente autenticato
-    // Usiamo l'ID dell'utente dal database come payload del token
-    const token = await generateJWT({ id: req.user._id });
-
-    // Reindirizza l'utente al frontend, passando il token come parametro URL
-    // Il frontend può quindi salvare questo token e usarlo per le richieste autenticate
-    res.redirect(`http://localhost:5173/login?token=${token}`);
+      // Genera un JWT (JSON Web Token) per l'utente autenticato
+      // req.user contiene i dati dell'utente forniti da Passport dopo l'autenticazione
+      const token = await generateJWT({ id: req.user._id });
+  
+      // Reindirizza l'utente al frontend, passando il token come parametro URL
+      res.redirect(`${FRONTEND_URL}/login?token=${token}`);
     } catch (error) {
-    // Se c'è un errore nella generazione del token, lo logghiamo
-    console.error("Errore nella generazione del token:", error);
-    // E reindirizziamo l'utente alla pagina di login con un messaggio di errore
-    res.redirect("/login?error=auth_failed");
+      // Se c'è un errore nella generazione del token, lo logghiamo
+      console.error('Errore nella generazione del token:', error);
+      // E reindirizziamo l'utente alla pagina di login con un messaggio di errore
+      res.redirect(`${FRONTEND_URL}/login?error=auth_failed`);
     }
 }
-);  
 
 export default router;
