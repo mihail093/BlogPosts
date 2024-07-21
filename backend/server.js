@@ -31,8 +31,8 @@ const corsOptions = {
     // Queste sono gli URL da cui il nostro frontend farà richieste al backend.
     const whitelist = [
       'http://localhost:5173', // Frontend in sviluppo
-       // Frontend in produzione (prendere da vercel!)
-       // URL del backend (prendere da render!)
+       'blog-posts-chi.vercel.app', // Frontend in produzione (vercel)
+       'https://blogposts-iwdb.onrender.com' // URL del backend (render)
     ];
     
     if (process.env.NODE_ENV === 'development') {

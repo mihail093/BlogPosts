@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // Definiamo l'url di base'
-const API_URL = "http://localhost:3001/api";
+// const API_URL = "http://localhost:3001/api";
+const API_URL = "https://blogposts-iwdb.onrender.com/api" // render + /api
 
 // Configura un'istanza di axios con l'URL di base
 const api = axios.create({
